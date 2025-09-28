@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FrutaStock Pro - Sistema de Inventario Seguro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-green-50 to-emerald-100 min-h-screen fruit-pattern">
+    
+    <!-- Demo Badge -->
+    <div id="demoBadge" class="demo-badge hidden">
+        <div class="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center space-x-2">
+            <span class="text-lg">🎭</span>
+            <span class="font-bold text-sm">MODO DEMO</span>
+            <button onclick="exitDemo()" class="ml-2 hover:bg-white hover:bg-opacity-20 rounded-full p-1 transition-all">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="fixed inset-0 gradient-bg flex items-center justify-center z-50">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md mx-4 bounce-in">
+            <div class="text-center mb-8">
+                <!-- Logo SVG -->
+                <div class="mx-auto w-20 h-20 mb-4">
+                    <svg viewBox="0 0 100 100" class="w-full h-full">
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Canasta -->
+                        <path d="M20 40 L80 40 L75 80 L25 80 Z" fill="url(#logoGradient)" stroke="#047857" stroke-width="2"/>
+                        <!-- Manzana -->
+                        <circle cx="40" cy="25" r="8" fill="#ef4444"/>
+                        <path d="M40 17 Q42 15 44 17" stroke="#10b981" stroke-width="2" fill="none"/>
+                        <!-- Naranja -->
+                        <circle cx="55" cy="30" r="7" fill="#f97316"/>
+                        <!-- Plátano -->
+                        <path d="M25 20 Q30 15 35 25" stroke="#eab308" stroke-width="6" fill="none" stroke-linecap="round"/>
+                        <!-- Detalles de la canasta -->
+                        <line x1="30" y1="40" x2="28" y2="75" stroke="#047857" stroke-width="1"/>
+                        <line x1="50" y1="40" x2="50" y2="80" stroke="#047857" stroke-width="1"/>
+                        <line x1="70" y1="40" x2="72" y2="75" stroke="#047857" stroke-width="1"/>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">FrutaStock Pro</h1>
+                <p class="text-gray-600 mt-2">Sistema de Inventario Seguro</p>
+            </div>
+            
+            <div id="loginForm">
+                <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">Iniciar Sesión</h2>
+                <form id="loginFormElement" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+                        <input type="password" id="loginPassword" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="Ingresa tu contraseña">
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-3 px-6 rounded-xl font-medium transition-all transform hover:scale-105">
+                        🔓 Acceder
+                    </button>
+                </form>
+                
+                <div class="mt-6 text-center space-y-3">
+                    <button onclick="showCreatePassword()" class="block w-full text-green-600 hover:text-green-700 text-sm font-medium">
+                        ¿Primera vez? Crear contraseña
+                    </button>
+                    <div class="border-t pt-3">
+                        <button onclick="startDemo()" class="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white py-3 px-6 rounded-xl font-medium transition-all transform hover:scale-105">
+                            🎭 Modo Demo - Ver Sistema Completo
+                        </button>
+                        <p class="text-xs text-gray-500 mt-2">Explora todas las funciones con datos de ejemplo</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="createPasswordForm" class="hidden">
+                <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">Crear Contraseña</h2>
+                <form id="createPasswordFormElement" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nueva Contraseña</label>
+                        <input type="password" id="newPassword" required minlength="4" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="Mínimo 4 caracteres">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Confirmar Contraseña</label>
+                        <input type="password" id="confirmPassword" required minlength="4" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="Repite la contraseña">
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-3 px-6 rounded-xl font-medium transition-all transform hover:scale-105">
+                        🔐 Crear Contraseña
+                    </button>
+                </form>
+                
+                <div class="mt-4 text-center">
+                    <button onclick="showLogin()" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                        ← Volver al login
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <!-- Header -->
+        <header class="bg-white shadow-xl border-b-4 border-green-500">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12">
+                            <svg viewBox="0 0 100 100" class="w-full h-full">
+                                <defs>
+                                    <linearGradient id="headerLogoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M20 40 L80 40 L75 80 L25 80 Z" fill="url(#headerLogoGradient)" stroke="#047857" stroke-width="2"/>
+                                <circle cx="40" cy="25" r="8" fill="#ef4444"/>
+                                <path d="M40 17 Q42 15 44 17" stroke="#10b981" stroke-width="2" fill="none"/>
+                                <circle cx="55" cy="30" r="7" fill="#f97316"/>
+                                <path d="M25 20 Q30 15 35 25" stroke="#eab308" stroke-width="6" fill="none" stroke-linecap="round"/>
+                                <line x1="30" y1="40" x2="28" y2="75" stroke="#047857" stroke-width="1"/>
+                                <line x1="50" y1="40" x2="50" y2="80" stroke="#047857" stroke-width="1"/>
+                                <line x1="70" y1="40" x2="72" y2="75" stroke="#047857" stroke-width="1"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">FrutaStock Pro</h1>
+                            <p class="text-sm text-gray-600">Sistema de Inventario Seguro</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-sm text-gray-600">Productos: <span id="totalProducts" class="font-semibold text-green-600">0</span></p>
+                            <p class="text-sm text-gray-600">Ventas hoy: <span id="dailySales" class="font-semibold text-blue-600">$0</span></p>
+                        </div>
+                        <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                            🚪 Salir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="bg-white shadow-lg border-b-2 border-gray-100">
+            <div class="container mx-auto px-4">
+                <div class="flex space-x-1 overflow-x-auto">
+                    <button onclick="showSection('inventory')" class="nav-btn px-6 py-4 text-sm font-medium text-gray-700 hover:text-green-600 hover:bg-green-50 border-b-3 border-transparent hover:border-green-500 whitespace-nowrap transition-all">
+                        📦 Inventario
+                    </button>
+                    <button onclick="showSection('add-product')" class="nav-btn px-6 py-4 text-sm font-medium text-gray-700 hover:text-green-600 hover:bg-green-50 border-b-3 border-transparent hover:border-green-500 whitespace-nowrap transition-all">
+                        ➕ Agregar Producto
+                    </button>
+                    <button onclick="showSection('sales')" class="nav-btn px-6 py-4 text-sm font-medium text-gray-700 hover:text-green-600 hover:bg-green-50 border-b-3 border-transparent hover:border-green-500 whitespace-nowrap transition-all">
+                        💰 Ventas
+                    </button>
+                    <button onclick="showSection('reports')" class="nav-btn px-6 py-4 text-sm font-medium text-gray-700 hover:text-green-600 hover:bg-green-50 border-b-3 border-transparent hover:border-green-500 whitespace-nowrap transition-all">
+                        📊 Reportes
+                    </button>
+                    <button onclick="showSection('alerts')" class="nav-btn px-6 py-4 text-sm font-medium text-gray-700 hover:text-green-600 hover:bg-green-50 border-b-3 border-transparent hover:border-green-500 whitespace-nowrap transition-all">
+                        🚨 Alertas
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-6">
+            <!-- Inventory Section -->
+            <section id="inventory-section" class="section fade-in">
+                <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">🍎 Inventario de Productos</h2>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <input type="text" id="searchInput" placeholder="🔍 Buscar producto..." class="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all">
+                            <select id="filterCategory" class="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 transition-all">
+                                <option value="">Todas las categorías</option>
+                                <option value="Frutas">🍎 Frutas</option>
+                                <option value="Verduras">🥬 Verduras</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gradient-to-r from-green-50 to-emerald-50 border-b-2 border-green-200">
+                                    <th class="text-left py-4 px-4 font-semibold text-gray-700">Producto</th>
+                                    <th class="text-left py-4 px-4 font-semibold text-gray-700">Categoría</th>
+                                    <th class="text-left py-4 px-4 font-semibold text-gray-700">Stock</th>
+                                    <th class="text-left py-4 px-4 font-semibold text-gray-700">Costo</th>
+                                    <th class="text-left py-4 px-4 font-semibold text-gray-700">Precio Venta</th>
+                                    <th class="text-left py-4 px-4 font-semibold text-gray-700">Margen</th>
+                                    <th class="text-left py-4 px-4 font-semibold text-gray-700">Vencimiento</th>
+                                    <th class="text-left py-4 px-4 font-semibold text-gray-700">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryTable">
+                                <!-- Products will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="emptyInventory" class="text-center py-16 hidden">
+                        <div class="text-8xl mb-6">🛒</div>
+                        <h3 class="text-2xl font-bold text-gray-600 mb-3">Inventario vacío</h3>
+                        <p class="text-gray-500 mb-6 text-lg">Agrega tu primer producto para comenzar</p>
+                        <button onclick="showSection('add-product')" class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-3 rounded-xl font-medium transition-all transform hover:scale-105">
+                            ➕ Agregar Producto
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Add Product Section -->
+            <section id="add-product-section" class="section hidden">
+                <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">➕ Agregar Nuevo Producto</h2>
+                    
+                    <form id="productForm" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">🏷️ Nombre del Producto</label>
+                                <div class="relative">
+                                    <input type="text" id="productName" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="Ej: Manzanas Rojas" autocomplete="off">
+                                    <div id="productSuggestions" class="absolute z-50 w-full bg-white border border-gray-300 rounded-xl shadow-xl mt-1 max-h-60 overflow-y-auto hidden">
+                                        <!-- Suggestions will appear here -->
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">📂 Categoría</label>
+                                <select id="productCategory" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 transition-all">
+                                    <option value="">Seleccionar categoría</option>
+                                    <option value="Frutas">🍎 Frutas</option>
+                                    <option value="Verduras">🥬 Verduras</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Cantidad y Stock -->
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-200">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">📦 Inventario del Producto</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">⚖️ Cantidad en Kilogramos</label>
+                                    <input type="number" id="productQuantityKg" required min="0" step="0.1" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="Ej: 25.5 kg">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">⚠️ Stock Mínimo</label>
+                                    <div class="px-4 py-3 bg-gray-100 border border-gray-300 rounded-xl text-gray-700 font-medium">
+                                        10 kg (automático)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Precios de Compra -->
+                        <div class="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-2xl border border-orange-200">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">🛒 Costo de Compra (CLP)</h3>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">🏷️ Costo por Kilogramo</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-500 font-medium">$</span>
+                                    <input type="number" id="productCostKg" required min="0" step="1" class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all" placeholder="Ej: 2000">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Precios de Venta -->
+                        <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-2xl border border-green-200">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">💰 Precios de Venta (CLP)</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">💵 Precio por Unidad</label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-3 text-gray-500 font-medium">$</span>
+                                        <input type="number" id="productPriceUnit" min="0" step="1" class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="Ej: 500">
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">💵 Precio por Kilogramo</label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-3 text-gray-500 font-medium">$</span>
+                                        <input type="number" id="productPriceKg" min="0" step="1" class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="Ej: 3500">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">📅 Fecha de Vencimiento</label>
+                            <input type="date" id="productExpiry" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all">
+                        </div>
+                        
+                        <div>
+                            <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-4 px-6 rounded-xl font-medium transition-all transform hover:scale-105 text-lg">
+                                ✨ Agregar Producto
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Sales Section -->
+            <section id="sales-section" class="section hidden">
+                <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">💰 Registrar Venta</h2>
+                    
+                    <form id="saleForm" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">🛍️ Producto</label>
+                                <select id="saleProduct" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 transition-all">
+                                    <option value="">Seleccionar producto</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">📦 Tipo de Venta</label>
+                                <select id="saleType" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 transition-all">
+                                    <option value="">Seleccionar tipo</option>
+                                    <option value="units">Por Unidades</option>
+                                    <option value="kg">Por Kilogramos</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">📦 Cantidad</label>
+                                <input type="number" id="saleQuantity" required min="1" step="1" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="Cantidad">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">💵 Precio Unitario</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-500 font-medium">$</span>
+                                    <input type="number" id="saleUnitPrice" min="0" step="1" class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="Precio">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">💰 Total</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-3 text-gray-500 font-medium">$</span>
+                                    <input type="text" id="saleTotal" readonly class="w-full pl-8 pr-4 py-3 bg-gray-100 border border-gray-300 rounded-xl text-lg font-semibold" placeholder="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="productInfo" class="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200 hidden">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p class="text-blue-800 font-medium mb-2">📦 Stock Disponible:</p>
+                                    <div id="stockInfo" class="text-blue-700"></div>
+                                </div>
+                                <div>
+                                    <p class="text-blue-800 font-medium mb-2">💵 Precios Disponibles:</p>
+                                    <div id="priceInfo" class="text-blue-700"></div>
+                                </div>
+                            </div>
+                            <p class="text-blue-800 mt-3"><strong>📂 Categoría:</strong> <span id="productCategoryInfo">-</span></p>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-4 px-6 rounded-xl font-medium transition-all transform hover:scale-105 text-lg">
+                            🎯 Registrar Venta
+                        </button>
+                    </form>
+                    
+                    <div class="mt-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">📊 Ventas de Hoy</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="bg-gradient-to-r from-blue-50 to-purple-50 border-b-2 border-blue-200">
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">⏰ Hora</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">🛍️ Producto</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">📦 Cantidad</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">💵 Precio Unit.</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-gray-700">💰 Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="salesTable">
+                                    <!-- Sales will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reports-section" class="section hidden">
+                <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">📊 Reportes y Estadísticas</h2>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <select id="reportMonth" class="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 transition-all">
+                                <option value="">Seleccionar mes</option>
+                                <option value="0">Enero</option>
+                                <option value="1">Febrero</option>
+                                <option value="2">Marzo</option>
+                                <option value="3">Abril</option>
+                                <option value="4">Mayo</option>
+                                <option value="5">Junio</option>
+                                <option value="6">Julio</option>
+                                <option value="7">Agosto</option>
+                                <option value="8">Septiembre</option>
+                                <option value="9">Octubre</option>
+                                <option value="10">Noviembre</option>
+                                <option value="11">Diciembre</option>
+                            </select>
+                            <select id="reportYear" class="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 transition-all">
+                                <option value="">Seleccionar año</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                                <option value="2022">2022</option>
+                            </select>
+                            <button onclick="downloadReport()" class="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white px-6 py-2 rounded-xl font-medium transition-all transform hover:scale-105 whitespace-nowrap">
+                                📄 Descargar Reporte
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-gradient-to-br from-green-400 to-emerald-600 p-6 rounded-2xl text-white shadow-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-green-100 text-sm">Total Productos</p>
+                                    <p class="text-4xl font-bold" id="reportTotalProducts">0</p>
+                                </div>
+                                <div class="text-5xl opacity-80">📦</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-blue-400 to-purple-600 p-6 rounded-2xl text-white shadow-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-blue-100 text-sm">Ventas Hoy</p>
+                                    <p class="text-4xl font-bold" id="reportDailySales">$0</p>
+                                </div>
+                                <div class="text-5xl opacity-80">💰</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-yellow-400 to-orange-600 p-6 rounded-2xl text-white shadow-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-yellow-100 text-sm">Ganancia Hoy</p>
+                                    <p class="text-4xl font-bold" id="reportDailyProfit">$0</p>
+                                </div>
+                                <div class="text-5xl opacity-80">📈</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-red-400 to-pink-600 p-6 rounded-2xl text-white shadow-lg">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-red-100 text-sm">Productos en Alerta</p>
+                                    <p class="text-4xl font-bold" id="reportAlerts">0</p>
+                                </div>
+                                <div class="text-5xl opacity-80">🚨</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Reporte Mensual -->
+                    <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-2xl border border-indigo-200 mb-8">
+                        <h3 class="text-xl font-bold text-gray-800 mb-6"> Resumen Financiero del Mes Actual</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="bg-white p-4 rounded-xl shadow-sm border">
+                                <div class="text-center">
+                                    <p class="text-gray-600 text-sm mb-2"> Ingresos por Ventas</p>
+                                    <p class="text-2xl font-bold text-green-600" id="monthlySales">$0</p>
+                                </div>
+                            </div>
+                            <div class="bg-white p-4 rounded-xl shadow-sm border">
+                                <div class="text-center">
+                                    <p class="text-gray-600 text-sm mb-2"> Inversiones (Compras)</p>
+                                    <p class="text-2xl font-bold text-blue-600" id="monthlyInvestments">$0</p>
+                                </div>
+                            </div>
+                            <div class="bg-white p-4 rounded-xl shadow-sm border">
+                                <div class="text-center">
+                                    <p class="text-gray-600 text-sm mb-2"> Costos de Ventas</p>
+                                    <p class="text-2xl font-bold text-orange-600" id="monthlyCosts">$0</p>
+                                </div>
+                            </div>
+                            <div class="bg-white p-4 rounded-xl shadow-sm border">
+                                <div class="text-center">
+                                    <p class="text-gray-600 text-sm mb-2"> Ganancia/Pérdida</p>
+                                    <p class="text-2xl font-bold" id="monthlyProfit">$0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-gradient-to-r from-purple-100 to-indigo-100 p-4 rounded-xl border border-purple-200">
+                                <div class="text-center">
+                                    <p class="text-purple-800 text-sm mb-2"> ROI (Retorno de Inversión)</p>
+                                    <p class="text-xl font-bold text-purple-700" id="monthlyROI">0%</p>
+                                </div>
+                            </div>
+                            <div class="bg-gradient-to-r from-teal-100 to-cyan-100 p-4 rounded-xl border border-teal-200">
+                                <div class="text-center">
+                                    <p class="text-teal-800 text-sm mb-2"> Margen de Ganancia</p>
+                                    <p class="text-xl font-bold text-teal-700" id="monthlyMargin">0%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-2xl border border-yellow-200">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">🏆 Productos Más Vendidos</h3>
+                            <div id="topProducts" class="space-y-3">
+                                <!-- Top products will be loaded here -->
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gradient-to-br from-red-50 to-pink-50 p-6 rounded-2xl border border-red-200">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">⚠️ Productos con Bajo Stock</h3>
+                            <div id="lowStockProducts" class="space-y-3">
+                                <!-- Low stock products will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Alerts Section -->
+            <section id="alerts-section" class="section hidden">
+                <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">🚨 Centro de Alertas</h2>
+                    
+                    <div id="alertsContainer" class="space-y-4">
+                        <!-- Alerts will be loaded here -->
+                    </div>
+                    
+                    <div id="noAlerts" class="text-center py-16 hidden">
+                        <div class="text-8xl mb-6">✅</div>
+                        <h3 class="text-2xl font-bold text-gray-600 mb-3">¡Todo en orden!</h3>
+                        <p class="text-gray-500 text-lg">No hay alertas pendientes en este momento</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md slide-up">
+            <div class="p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">✏️ Editar Producto</h3>
+                
+                <form id="editForm" class="space-y-4">
+                    <input type="hidden" id="editProductId">
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+                        <input type="text" id="editName" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 transition-all">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Cantidad</label>
+                        <div class="flex space-x-2">
+                            <input type="number" id="editQuantity" required min="0" step="0.1" class="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 transition-all">
+                            <select id="editUnit" class="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 transition-all">
+                                <option value="unidades">Unidades</option>
+                                <option value="kg">Kilogramos</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Costo (CLP)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-500 font-medium">$</span>
+                            <input type="number" id="editCost" required min="0" step="1" class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 transition-all">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Precio Venta (CLP)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-3 text-gray-500 font-medium">$</span>
+                            <input type="number" id="editPrice" required min="0" step="1" class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 transition-all">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Vencimiento</label>
+                        <input type="date" id="editExpiry" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 transition-all">
+                    </div>
+                    
+                    <div class="flex space-x-3 pt-4">
+                        <button type="button" onclick="closeEditModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 py-3 px-4 rounded-xl font-medium transition-all">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-3 px-4 rounded-xl font-medium transition-all">
+                            💾 Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="fixed top-4 right-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-xl shadow-lg transform translate-x-full transition-transform duration-300 z-50">
+        <div class="flex items-center space-x-2">
+            <span class="text-xl">✅</span>
+            <span id="notificationText" class="font-medium"></span>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
